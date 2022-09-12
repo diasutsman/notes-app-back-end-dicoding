@@ -1,13 +1,29 @@
+const ClientError = require("../../exceptions/ClientError")
+const NotFoundError = require("../../exceptions/NotFoundError")
 const NotesService = require("../../services/inMemory/NotesService")
+const NotesValidator = require('../../validator/notes/index')
+
+const serverErrorResponse = (error, h) => {
+    // Server ERROR!
+    const response = h.response({
+        status: 'error',
+        message: 'Maaf, terjadi kegagalan pada server kami'
+    })
+    response.code(500)
+    console.error(error)
+    return response
+}
 
 class NotesHandler {
 
     /**
      * 
      * @param {NotesService} service
+     * @param {NotesValidator} validator
      */
-    constructor(service) {
+    constructor(service, validator) {
         this._service = service
+        this._validator = validator
 
         this.postNoteHandler = this.postNoteHandler.bind(this)
         this.putNoteByIdHandler = this.putNoteByIdHandler.bind(this)
@@ -17,9 +33,11 @@ class NotesHandler {
     }
 
     postNoteHandler(request, h) {
-        const { title = 'untitled', body, tags } = request.payload
-
         try {
+            this._validator.validateNotePayload(request.payload)
+
+            const { title = 'untitled', body, tags } = request.payload
+
             const noteId = this._service.addNote({ title, body, tags })
 
             const response = h.response({
@@ -32,12 +50,15 @@ class NotesHandler {
             response.code(201)
             return response
         } catch (error) {
-            const response = h.response({
-                status: 'fail',
-                message: error.message,
-            })
-            response.code(400)
-            return response
+            if (error instanceof ClientError) {
+                const response = h.response({
+                    status: 'fail',
+                    message: error.message,
+                })
+                response.code(error.code)
+                return response
+            }
+            return serverErrorResponse()
         }
     }
 
@@ -64,17 +85,22 @@ class NotesHandler {
                 }
             }
         } catch (error) {
-            const response = h.response({
-                status: 'fail',
-                message: error.message,
-            })
-            response.code(404)
-            return response
+            if (error instanceof ClientError) {
+                const response = h.response({
+                    status: 'fail',
+                    message: error.message,
+                })
+                response.code(error.code)
+                return response
+            }
+            return serverErrorResponse()
         }
     }
 
-    putNoteByIdHandler(request) {
+    putNoteByIdHandler(request, h) {
         try {
+            this._validator.validateNotePayload(request.payload)
+
             const { id } = request.params
 
             this._service.editNoteById(id, request.payload)
@@ -84,12 +110,15 @@ class NotesHandler {
                 message: 'Catatan berhasil diperbarui'
             }
         } catch (error) {
-            const response = h.response({
-                status: 'fail',
-                message: error.message,
-            })
-            response.code(404)
-            return response
+            if (error instanceof ClientError) {
+                const response = h.response({
+                    status: 'fail',
+                    message: error.message,
+                })
+                response.code(error.code)
+                return response
+            }
+            return serverErrorResponse()
         }
     }
 
@@ -104,12 +133,16 @@ class NotesHandler {
                 message: 'Catatan berhasil dihapus'
             }
         } catch (error) {
-            const response = h.response({
-                status: 'fail',
-                message: error.message,
-            })
-            response.code(404)
-            return response
+            if (error instanceof ClientError) {
+                const response = h.response({
+                    status: 'fail',
+                    message: error.message,
+                })
+                response.code(error.code)
+                return response
+            }
+
+            return serverErrorResponse()
         }
     }
 }
