@@ -1,14 +1,20 @@
+// mengimpor dotenv dan menjalankan konfigurasinya
+require('dotenv').config()
+
 const Hapi = require('@hapi/hapi');
+const { Pool } = require('pg');
 const notes = require('./api/notes/index');
-const NotesService = require('./services/inMemory/NotesService');
+const NotesService = require('./services/postgres/NotesService');
 const NotesValidator = require('./validator/notes/index')
 
 const init = async () => {
+
+
     const notesService = new NotesService()
 
     const server = Hapi.server({
-        port: 5000,
-        host: 'localhost',
+        port: process.env.PORT,
+        host: process.env.HOST ,
         routes: {
             cors: {
                 origin: ['*']
