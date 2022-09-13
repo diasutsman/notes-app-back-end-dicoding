@@ -1,10 +1,10 @@
-const ClientError = require("./ClientError");
+const ClientError = require('./ClientError');
 
 class InvariantError extends ClientError {
-    constructor(message) {
-        super(message)
-        this.name = this.constructor.name
-    }
+  constructor(message) {
+    super(message);
+    this.name = this.constructor.name;
+  }
 }
 
-module.exports = InvariantError
+module.exports = InvariantError;

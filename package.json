@@ -6,6 +6,7 @@
   "scripts": {
     "start-dev": "nodemon ./src/server",
     "lint": "eslint ./src",
+    "fix-lint": "eslint --fix ./src",
     "migrate": "node-pg-migrate"
   },
   "keywords": [],
