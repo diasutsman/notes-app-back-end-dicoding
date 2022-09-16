@@ -12,7 +12,6 @@ class UsersHandler {
 
   async postUserHandler(request, h) {
     try {
-      console.log(request.payload);
       this.validator.validateUserPayload(request.payload);
 
       const { username, password, fullname } = request.payload;
@@ -35,7 +34,6 @@ class UsersHandler {
           status: 'fail',
           message: error.message,
         });
-        console.log(error.message);
         response.code(error.code);
         return response;
       }
