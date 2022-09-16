@@ -35,7 +35,11 @@ class NotesHandler {
 
       const { title = 'untitled', body, tags } = request.payload;
 
-      const noteId = await this.service.addNote({ title, body, tags });
+      const { id: credentialId } = request.auth.credentials;
+
+      const noteId = await this.service.addNote({
+        title, body, tags, owner: credentialId,
+      });
 
       const response = h.response({
         status: 'success',
@@ -59,8 +63,9 @@ class NotesHandler {
     }
   }
 
-  async getNotesHandler() {
-    const notes = await this.service.getNotes();
+  async getNotesHandler(request) {
+    const { id: credentialId } = request.auth.credentials;
+    const notes = await this.service.getNotes(credentialId);
     return {
       status: 'success',
       data: {
@@ -72,7 +77,11 @@ class NotesHandler {
   async getNoteByIdHandler(request, h) {
     try {
       const { id } = request.params;
+      const { id: credentialId } = request.auth.credentials;
 
+      // Verify if the user has access to the resources
+      await this.service.verifyNoteOwner(id, credentialId);
+      // if yes then do the action
       const note = await this.service.getNoteById(id);
 
       return {
@@ -100,6 +109,11 @@ class NotesHandler {
 
       const { id } = request.params;
 
+      const { id: credentialId } = request.auth.credentials;
+
+      // Verify if the user has access to the resources
+      await this.service.verifyNoteOwner(id, credentialId);
+      // if yes then do the action
       await this.service.editNoteById(id, request.payload);
 
       return {
@@ -123,6 +137,11 @@ class NotesHandler {
     try {
       const { id } = request.params;
 
+      const { id: credentialId } = request.auth.credentials;
+
+      // Verify if the user has access to the resources
+      await this.service.verifyNoteOwner(id, credentialId);
+      // if yes then do the action
       await this.service.deleteNoteById(id);
 
       return {
