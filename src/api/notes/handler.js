@@ -80,7 +80,7 @@ class NotesHandler {
       const { id: credentialId } = request.auth.credentials;
 
       // Verify if the user has access to the resources
-      await this.service.verifyNoteOwner(id, credentialId);
+      await this.service.verifyNoteAccess(id, credentialId);
       // if yes then do the action
       const note = await this.service.getNoteById(id);
 
@@ -112,7 +112,8 @@ class NotesHandler {
       const { id: credentialId } = request.auth.credentials;
 
       // Verify if the user has access to the resources
-      await this.service.verifyNoteOwner(id, credentialId);
+      await this.service.verifyNoteAccess(id, credentialId);
+
       // if yes then do the action
       await this.service.editNoteById(id, request.payload);
 
