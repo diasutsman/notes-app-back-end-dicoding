@@ -41,7 +41,7 @@ class CollaborationsHandler {
           status: 'fail',
           message: error.message,
         });
-        response.code(error.code);
+        response.code(error.statusCode);
         return response;
       }
       // Server ERROR!
@@ -81,7 +81,7 @@ class CollaborationsHandler {
           status: 'fail',
           message: error.message,
         });
-        response.code(error.code);
+        response.code(error.statusCode);
         return response;
       }
       // Server ERROR!

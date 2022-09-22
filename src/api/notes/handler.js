@@ -56,7 +56,7 @@ class NotesHandler {
           status: 'fail',
           message: error.message,
         });
-        response.code(error.code);
+        response.code(error.statusCode);
         return response;
       }
       return serverErrorResponse(error, h);
@@ -96,7 +96,7 @@ class NotesHandler {
           status: 'fail',
           message: error.message,
         });
-        response.code(error.code);
+        response.code(error.statusCode);
         return response;
       }
       return serverErrorResponse(error, h);
@@ -127,7 +127,7 @@ class NotesHandler {
           status: 'fail',
           message: error.message,
         });
-        response.code(error.code);
+        response.code(error.statusCode);
         return response;
       }
       return serverErrorResponse(error, h);
@@ -155,7 +155,7 @@ class NotesHandler {
           status: 'fail',
           message: error.message,
         });
-        response.code(error.code);
+        response.code(error.statusCode);
         return response;
       }
 

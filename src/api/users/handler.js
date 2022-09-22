@@ -35,7 +35,7 @@ class UsersHandler {
           status: 'fail',
           message: error.message,
         });
-        response.code(error.code);
+        response.code(error.statusCode);
         return response;
       }
 
@@ -68,7 +68,7 @@ class UsersHandler {
           status: 'fail',
           message: error.message,
         });
-        response.code(error.code);
+        response.code(error.statusCode);
         return response;
       }
 
@@ -100,7 +100,7 @@ class UsersHandler {
           status: 'fail',
           message: error.message,
         });
-        response.code(error.code);
+        response.code(error.statusCode);
         return response;
       }
 
