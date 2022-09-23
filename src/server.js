@@ -26,9 +26,10 @@ const CollaborationsService = require('./services/postgres/CollaborationsService
 const CollaborationsValidator = require('./validator/collaborations/index');
 
 // Exports
-const _exports = require('./api/exports/index')
-const ProducerService = require('./services/rabbitmq/ProducerService')
+const $exports = require('./api/exports/index');
+const ProducerService = require('./services/rabbitmq/ProducerService');
 const ExportsValidator = require('./validator/exports/index');
+const ClientError = require('./exceptions/ClientError');
 
 const init = async () => {
   const collaborationsService = new CollaborationsService();
@@ -103,13 +104,49 @@ const init = async () => {
       },
     },
     {
-      plugin: _exports, 
+      plugin: $exports,
       options: {
         service: ProducerService,
         validator: ExportsValidator,
-      }
-    }
+      },
+    },
   ]);
+
+  // Handle error
+  await server.ext('onPreResponse', (request, h) => {
+    // Get response from request
+    const { response } = request;
+
+    if (response instanceof Error) {
+      // Check if response is instance of ClientError
+      if (response instanceof ClientError) {
+        const newResponse = h.response({
+          status: 'fail',
+          message: response.message,
+        });
+        newResponse.code(response.statusCode);
+        return newResponse;
+      }
+
+      // keep client error handling by hapi natively,
+      // like 404, etc.
+      if (!response.isServer) {
+        return h.continue;
+      }
+
+      // penanganan server error sesuai kebutuhan
+      const newResponse = h.response({
+        status: 'error',
+        message: 'Maaf, terjadi kegagalan pada server kami.',
+      });
+      newResponse.code(500);
+      return newResponse;
+    }
+
+    // if not an error,
+    // continue with the previous response (uninterrupted)
+    return h.continue;
+  });
 
   await server.start();
   // eslint-disable-next-line no-console

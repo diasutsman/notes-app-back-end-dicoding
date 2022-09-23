@@ -1,17 +1,3 @@
-const ClientError = require('../../exceptions/ClientError');
-
-const serverErrorResponse = (error, h) => {
-  // Server ERROR!
-  const response = h.response({
-    status: 'error',
-    message: 'Maaf, terjadi kegagalan pada server kami',
-  });
-  response.code(500);
-  // eslint-disable-next-line no-console
-  console.error(error);
-  return response;
-};
-
 class NotesHandler {
   /**
      *
@@ -30,37 +16,25 @@ class NotesHandler {
   }
 
   async postNoteHandler(request, h) {
-    try {
-      this.validator.validateNotePayload(request.payload);
+    this.validator.validateNotePayload(request.payload);
 
-      const { title = 'untitled', body, tags } = request.payload;
+    const { title = 'untitled', body, tags } = request.payload;
 
-      const { id: credentialId } = request.auth.credentials;
+    const { id: credentialId } = request.auth.credentials;
 
-      const noteId = await this.service.addNote({
-        title, body, tags, owner: credentialId,
-      });
+    const noteId = await this.service.addNote({
+      title, body, tags, owner: credentialId,
+    });
 
-      const response = h.response({
-        status: 'success',
-        message: 'Catatan berhasil ditambahkan',
-        data: {
-          noteId,
-        },
-      });
-      response.code(201);
-      return response;
-    } catch (error) {
-      if (error instanceof ClientError) {
-        const response = h.response({
-          status: 'fail',
-          message: error.message,
-        });
-        response.code(error.statusCode);
-        return response;
-      }
-      return serverErrorResponse(error, h);
-    }
+    const response = h.response({
+      status: 'success',
+      message: 'Catatan berhasil ditambahkan',
+      data: {
+        noteId,
+      },
+    });
+    response.code(201);
+    return response;
   }
 
   async getNotesHandler(request) {
@@ -74,93 +48,56 @@ class NotesHandler {
     };
   }
 
-  async getNoteByIdHandler(request, h) {
-    try {
-      const { id } = request.params;
-      const { id: credentialId } = request.auth.credentials;
+  async getNoteByIdHandler(request) {
+    const { id } = request.params;
+    const { id: credentialId } = request.auth.credentials;
 
-      // Verify if the user has access to the resources
-      await this.service.verifyNoteAccess(id, credentialId);
-      // if yes then do the action
-      const note = await this.service.getNoteById(id);
+    // Verify if the user has access to the resources
+    await this.service.verifyNoteAccess(id, credentialId);
+    // if yes then do the action
+    const note = await this.service.getNoteById(id);
 
-      return {
-        status: 'success',
-        data: {
-          note,
-        },
-      };
-    } catch (error) {
-      if (error instanceof ClientError) {
-        const response = h.response({
-          status: 'fail',
-          message: error.message,
-        });
-        response.code(error.statusCode);
-        return response;
-      }
-      return serverErrorResponse(error, h);
-    }
+    return {
+      status: 'success',
+      data: {
+        note,
+      },
+    };
   }
 
-  async putNoteByIdHandler(request, h) {
-    try {
-      this.validator.validateNotePayload(request.payload);
+  async putNoteByIdHandler(request) {
+    this.validator.validateNotePayload(request.payload);
 
-      const { id } = request.params;
+    const { id } = request.params;
 
-      const { id: credentialId } = request.auth.credentials;
+    const { id: credentialId } = request.auth.credentials;
 
-      // Verify if the user has access to the resources
-      await this.service.verifyNoteAccess(id, credentialId);
+    // Verify if the user has access to the resources
+    await this.service.verifyNoteAccess(id, credentialId);
 
-      // if yes then do the action
-      await this.service.editNoteById(id, request.payload);
+    // if yes then do the action
+    await this.service.editNoteById(id, request.payload);
 
-      return {
-        status: 'success',
-        message: 'Catatan berhasil diperbarui',
-      };
-    } catch (error) {
-      if (error instanceof ClientError) {
-        const response = h.response({
-          status: 'fail',
-          message: error.message,
-        });
-        response.code(error.statusCode);
-        return response;
-      }
-      return serverErrorResponse(error, h);
-    }
+    return {
+      status: 'success',
+      message: 'Catatan berhasil diperbarui',
+    };
   }
 
-  async deleteNoteByIdHandler(request, h) {
-    try {
-      const { id } = request.params;
+  async deleteNoteByIdHandler(request) {
+    const { id } = request.params;
 
-      const { id: credentialId } = request.auth.credentials;
+    const { id: credentialId } = request.auth.credentials;
 
-      // Verify if the user has access to the resources
-      await this.service.verifyNoteOwner(id, credentialId);
-      // if yes then do the action
-      await this.service.deleteNoteById(id);
+    // Verify if the user has access to the resources
+    await this.service.verifyNoteOwner(id, credentialId);
+    // if yes then do the action
+    await this.service.deleteNoteById(id);
 
-      return {
-        status: 'success',
-        message: 'Catatan berhasil dihapus',
-      };
-    } catch (error) {
-      if (error instanceof ClientError) {
-        const response = h.response({
-          status: 'fail',
-          message: error.message,
-        });
-        response.code(error.statusCode);
-        return response;
-      }
-
-      return serverErrorResponse(error, h);
-    }
+    return {
+      status: 'success',
+      message: 'Catatan berhasil dihapus',
+    };
   }
 }
 

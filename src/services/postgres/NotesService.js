@@ -130,12 +130,8 @@ class NotesService {
 
       // if not owner then
       // check if user has access to the notes
-      try {
-        // if user is collaborator, verification passed
-        await this.collaborationsService.verifyCollaborator(noteId, userId);
-      } catch (error) {
-        throw error;
-      }
+      // if user is collaborator, verification passed
+      await this.collaborationsService.verifyCollaborator(noteId, userId);
     }
   }
 }
