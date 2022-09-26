@@ -4,8 +4,9 @@ const InvariantError = require('../../exceptions/InvariantError');
 const AuthorizationError = require('../../exceptions/AuthorizationError');
 
 class CollaborationsService {
-  constructor() {
+  constructor(cacheService) {
     this.pool = new Pool();
+    this.cacheService = cacheService;
   }
 
   async addCollaboration(noteId, userId) {
@@ -21,6 +22,8 @@ class CollaborationsService {
     if (!result.rowCount) {
       throw new InvariantError('Kolaborasi gagal ditambahkan');
     }
+
+    await this.cacheService.delete(`notes:${userId}`)
 
     return result.rows[0].id;
   }
@@ -49,6 +52,8 @@ class CollaborationsService {
     if (!result.rowCount) {
       throw new AuthorizationError('Anda tidak berhak mengakses resource ini');
     }
+
+    await this.cacheService.delete(`notes:${userId}`)
   }
 }
 
